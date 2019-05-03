@@ -789,20 +789,211 @@ tar %>%
 tar %>%
   mutate(id=1:10) %>%
   select(id, content) %>%
-  mutate(pos = pos(content)) %>%
-  mutate(pos_noun = filter(grepl("/n", pos)))
+  unnest_tokens(pos, content, token = pos) %>% 
+  filter(grepl("/n", pos))
 
 # 8. gsub() 함수를 사용해서 POS 정보를 지우고 한글만 남기세요.
+tar %>%
+  mutate(id=1:10) %>%
+  select(id, content) %>%
+  unnest_tokens(pos, content, token = pos) %>% 
+  filter(grepl("/n", pos)) %>%
+  mutate(pos_done = gsub("/.*$", "", pos))
 
 
-  
+# 4.2.7 RcppMeCab 실습 ------------------------------------------------------
+
+# 4.2.7.1 RcppMeCab의 pos() 함수 사용 ------------------------------------------
+
+library(RcppMeCab)
+spidx %>% 
+  filter(president == "이명박") %>% 
+  filter(grepl("취임사", title)) %>% 
+  pull(link) ->
+  tar
+
+tar %>% 
+  get_speech(paragraph = T) %>%
+  select(paragraph, content) %>% 
+  # token에 사용할 함수 이름 pos를 입력
+  unnest_tokens(pos, content, token = pos) %>% 
+  mutate(pos_order = 1:n()) -> 
+  pos_res
+
+pos_res
+# # A tibble: 4,177 x 3
+# paragraph pos       pos_order
+# <int> <chr>         <int>
+#   1         1 존경/nng          1
+# 2         1 하/xsv            2
+# 3         1 는/etm            3
+# 4         1 국민/nng          4
+# 5         1 여러분/np         5
+# 6         1 !/sf              6
+# 7         2 700/sn            7
+# 8         2 만/nr             8
+# 9         2 해외/nng          9
+# 10         2 동포/nng         10
+# # ... with 4,167 more rows
+
+# 4.2.7.2 앞선 코드의 문제점 ------------------------------------------------------
+
+# 새로운다 같은 글자가 발생
+
+pos_res %>%
+  filter(grepl("/va", pos)) %>% 
+  mutate(pos_done = gsub("/.*$", "다", pos))
+# # A tibble: 49 x 4
+# paragraph pos           pos_order pos_done
+# <int> <chr>             <int> <chr>   
+#   1         9 눈물겹/va           453 눈물겹다
+# 2        10 수많/va             502 수많다  
+# 3        14 새로운/va+etm       623 새로운다
+# 4        16 아름답/va           798 아름답다
+# 5        16 없/va               825 없다    
+# 6        16 없/va               835 없다    
+# 7        17 활기차/va           870 활기차다
+# 8        18 힘차/va             959 힘차다  
+# 9        20 있/va              1003 있다    
+# 10        21 쉽/va              1082 쉽다    
+# # ... with 39 more rows
 
 
-4.2.7 RcppMeCab 실습
-5 텍스트 마이닝 지표
-5.1 단어 출현 빈도
-5.1.1 단어 출현 빈도 계산
-5.1.2 사용예 : 워드클라우드
+# 4.2.7.3 정규화 예시 ----------------------------------------------------------
+
+# 정규화란 표현 방법이 다른 단어들을 통합시켜서 같은 단어로 만들어주는 것. 
+# 보통 US, USA 등 같은 뜻이지만 다른 모양의 단어를 찾아 통일시키는 과정을 뜻함. 
+# 현재는 /vv+etm 중 마지막에 ㄴ 받침으로 끝나는 형태가 ㄴ 만 떼면 원형이 되는 경우를 정리하여 정규화하려고 함.
+
+library(tidyr)
+library(purrr)
+library(KoNLP)
+
+pos_res %>%
+  filter(grepl("/n", pos)) %>% 
+  mutate(pos_done = gsub("/.*$", "", pos)) ->
+  n_done
+
+pos_res %>%
+  filter(grepl("/v(a|v)$", pos)) %>% 
+  mutate(pos_done = gsub("/.*$", "다", pos)) ->
+  v_done
+
+pos_res %>%
+  filter(grepl("/sn", pos)) %>% 
+  mutate(pos_done = gsub("/.*$", "", pos)) ->
+  sn_done
+
+jamos <-
+  function(text) {
+    paste0(
+      convertHangulStringToJamos(text)
+      , collapse = "")
+  }
+
+pos_res %>%
+  filter(grepl("/v(a|v)\\+etm", pos)) %>%
+  mutate(po = gsub("/.*$", "", pos)) %>% 
+  mutate(post = po %>% 
+           map(jamos)) %>%
+  unnest %>%
+  mutate(n = nchar(post)) %>% 
+  mutate(posts = substr(post, 1, n - 1)) %>%
+  mutate(done = posts %>% 
+           map_chr(HangulAutomata)) %>% 
+  mutate(pos_done = paste0(done, "다")) ->
+  etm_done
+
+bind_rows(sn_done,
+          n_done,
+          v_done,
+          etm_done) %>%
+  filter(nchar(pos_done) > 1) %>% 
+  arrange(pos_order) %>% 
+  select(paragraph, pos_done) -> 
+  pos_done
+
+pos_done
+# # A tibble: 1,542 x 2
+# paragraph pos_done
+# <int> <chr>   
+#   1         1 존경    
+# 2         1 국민    
+# 3         1 여러분  
+# 4         2 700     
+# 5         2 해외    
+# 6         2 동포    
+# 7         2 여러분  
+# 8         3 자리    
+# 9         3 참석    
+# 10         3 노무현  
+# # ... with 1,532 more rows
+
+
+# 5. 텍스트 마이닝 지표 ------------------------------------------------------------
+
+# 1. 단어 출현 빈도 : 단순히 단어가 나타난 횟수를 세서 확인
+# 2. 동시 출현 빈도 : 기준 단어와 함께 나타난 단어들과 그 횟수를 세서 확인
+# 3. tf-idf : 전체 문서에서 나타난 횟수와 개별 문서에서 나타난 횟수로 만든 지표 
+# 4 .감성 분석 : 단어를 점수화한 감성사전을 사용하여 점수를 합산하여 만든 지표
+
+# 5.1 단어 출현 빈도 ------------------------------------------------------------
+
+# 5.1.1 단어 출현 빈도 계산 -------------------------------------------------------
+
+# count() 함수는 데이터에서 총 몇 번 나왔는지 세어주는 집계함수. 
+# group_by()와 함께 사용하여 각 연설문별 출현 횟수 등을 구할 수 있음.
+
+library(dplyr)
+pos_done %>% 
+  count(pos_done, sort = T) -> 
+  wn
+wn
+# # A tibble: 746 x 2
+# pos_done     n
+# <chr>    <int>
+#   1 국민        30
+# 2 우리        27
+# 3 하다        25
+# 4 있다        24
+# 5 나라        22
+# 6 사회        22
+# 7 여러분      18
+# 8 세계        17
+# 9 대한민국    16
+# 10 정부        15
+# # ... with 736 more rows
+
+# 5.1.2 사용예 : 워드클라우드 ------------------------------------------------------
+
+# count() 함수로 단어와 그 빈도 테이블을 만들었다면, {wordcloud} 패키지를 사용해서 워드클라우드를 만들 수 있음 
+# {showtext} 패키지를 출력 결과물의 폰트를 설정하기 위한 패키지로 Google Fonts에서 폰트 데이터를 받아와서 출력물에 사용할 수 있음.
+
+library(wordcloud)
+# if (!requireNamespace("showtext")) {
+#   install.packages("showtext", repos = "https://cloud.r-project.org")
+# }
+library(showtext)
+font_add_google("Noto Sans", "notosans")
+showtext_auto()
+wn %>% 
+  with(wordcloud(pos_done, n, family = "notosans"))
+  # with(wordcloud(pos_done, n, family = "NanumGothic"))
+
+# 빈도에 따른 색 입히기
+#  https://github.com/EmilHvitfeldt/r-color-palettes 에 R에서 사용할 수 있는 색 테마 패키지들을 소개하고 있음.
+
+# install.packages("Redmonder")
+library(Redmonder)
+pal = redmonder.pal(6, "sPBIRdPu")
+
+wn %>% 
+  with(wordcloud(pos_done, 
+                 n, 
+                 family = "notosans",
+                 colors = pal))
+
+
 5.1.3 연습문제
 5.2 동시 출현 빈도
 5.2.1 동시 출현 빈도 계산
