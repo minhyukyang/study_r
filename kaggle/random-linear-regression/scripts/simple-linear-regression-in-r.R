@@ -106,7 +106,8 @@ ggplot() +
 
 # Finding accuracy
 compare <- cbind(actual=testSet$x, y_pred)  # combine actual and predicted
-mean(apply(compare, 1, min)/apply(compare, 1, max))
+compare[,2] <- ifelse(compare[,2]<0, 1e-10, compare[,2])
+mean (apply(compare, 1, min)/apply(compare, 1, max))
 mean(0.9,0.9,0.9,0.9)
 # -Inf
 # 0.9
