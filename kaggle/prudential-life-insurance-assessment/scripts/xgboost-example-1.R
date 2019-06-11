@@ -16,6 +16,7 @@ for (f in feature.names) {
     levels <- unique(c(train[[f]], test[[f]]))
     train[[f]] <- as.integer(factor(train[[f]], levels=levels))
     test[[f]]  <- as.integer(factor(test[[f]],  levels=levels))
+    print(levels)
   }
 }
 
