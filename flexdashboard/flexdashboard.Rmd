@@ -11,6 +11,7 @@ output:
 # library(devtools)
 # devtools::install_github("lovetoken/rdevteam")
 # https://github.com/lovetoken/rdevteam
+# https://lovetoken.gitbooks.io/r-dev-team-open-seminar/content/b3c4-c804-acfc-c81c/b124-c774-bc84-c5f0-ad00-ac80-c0c9-c5b4-cd94-cd9c-c800-c7a5-d504-b85c-adf8-b7a8-b9cc-b4e4-ae30/ad00-b828-ae30-c220-bcc4-b9ac-c11c-ce58.html
 library(rdevteam)
 library(shiny)
 library(flexdashboard)
