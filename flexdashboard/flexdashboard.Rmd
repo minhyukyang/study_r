@@ -1,5 +1,5 @@
 ---
-title: "Naver relation dashboard"
+title: "AI.M LAB"
 runtime : shiny
 output: 
   flexdashboard::flex_dashboard:
@@ -19,12 +19,13 @@ library(dplyr)
 library(DT)
 library(networkD3)
 library(bsplus)
+library(KoNLP)
 ```
 Sidebar {.sidebar}
 =================================================
 
 ```{r sidebar_ui}
-textInput("ui1", "Keyword", "현대모비스")
+textInput("ui1", "Keyword", "양민혁")
 actionButton("act", "Change apply")
 
 d <- reactive({
@@ -57,6 +58,41 @@ renderDT({
   })
 })
 ```
+
+OCR
+=================================================
+
+OCR Demo
+
+
+Senetiment Analysis
+=================================================
+
+Sentiment Analysis Demo
+
+### Input
+
+```{r input_text}
+textInput("ui2", "Sentence", "텍스트를 입력하세요")
+actionButton("act2", "Analysis")
+
+d <- reactive({
+  sentence <- input$ui2
+  extractNoun(sentence)
+})
+```
+
+### Output
+
+```{r}
+renderPrint({
+  req(input$act2)
+  isolate({
+    d() %>% print
+  })
+})
+```
+
 
 About
 =================================================
