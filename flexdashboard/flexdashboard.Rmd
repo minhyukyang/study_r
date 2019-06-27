@@ -1,5 +1,5 @@
 ---
-title: "AI.M LAB"
+title: "AIM LAB"
 runtime : shiny
 output: 
   flexdashboard::flex_dashboard:
@@ -20,12 +20,20 @@ library(DT)
 library(networkD3)
 library(bsplus)
 library(KoNLP)
+library(tesseract)
+library(magick)
+library(ggplot2)
+library(knitr)
+library(tidytext)
+library(tidyverse)
+library(magick)
+library(SnowballC)
 ```
 Sidebar {.sidebar}
 =================================================
 
 ```{r sidebar_ui}
-textInput("ui1", "Keyword", "양민혁")
+textInput("ui1", "Keyword", "챗봇")
 actionButton("act", "Change apply")
 
 d <- reactive({
@@ -59,11 +67,61 @@ renderDT({
 })
 ```
 
-OCR
+OCR {data-vertical_layout=scroll}
 =================================================
 
 OCR Demo
 
+column
+-------------------------------------------------
+
+### Image
+```{r, fig.retina = 1}
+include_graphics("pic/receipt.png") 
+```
+
+column
+-------------------------------------------------
+
+### Extract
+```{r}
+image <- image_read("pic/receipt.png")
+
+image_bearb <- image %>%
+  image_scale("x2000") %>%                        # rescale
+  image_background("white", flatten = TRUE) %>%   # set background to white
+  image_trim() %>%                                # Trim edges that are the background color from the image.
+  image_noise() %>%                               # Reduce noise in image using a noise peak elimination filter
+  image_enhance() %>%                             # Enhance image (minimize noise)
+  image_normalize() %>%                           # Normalize image (increase contrast by normalizing the pixel values to span the full range of color values).
+  image_contrast(sharpen = 1)                  # increase contrast
+  # image_deskew(treshold = 40)                     # deskew image -> creates negative offset in some scans
+
+# image_browse(image_bearb)
+# image_write(image_bearb, path = "flexdashboard/pic/receipt_scan_bearb.png", format = "png")
+
+whitelist <- "1234567890-.,;:qwertzuiopüasdfghjklöäyxcvbnmQWERTZUIOPÜASDFGHJKLÖÄYXCVBNM@ß€!$%&/()=?+"
+
+text <- ocr(image_bearb,
+# text <- ocr("flexdashboard/pic/receipt_scan_bearb.png",
+            engine = tesseract(language = "eng", 
+                               options = list(tessedit_char_whitelist = whitelist)))
+
+text_df <- data.frame(text = read.delim(textConnection(text),    # make text into dataframe
+                                        header = FALSE, 
+                                        sep = "\n", 
+                                        strip.white = TRUE))
+# text_df <- data.frame(text = read.delim(textConnection(text),    # make text into dataframe
+#                                         header = FALSE, 
+#                                         sep = "\n", 
+#                                         strip.white = TRUE)) %>%
+#   mutate(text = as.character(V1)) %>%
+#   unnest_tokens(word, text) %>%                                      # separate words
+#   mutate(word = wordStem(word, language = "eng"))                    # use word stem
+
+text_df %>% datatable
+
+```
 
 Senetiment Analysis
 =================================================
@@ -73,10 +131,10 @@ Sentiment Analysis Demo
 ### Input
 
 ```{r input_text}
-textInput("ui2", "Sentence", "텍스트를 입력하세요")
+textInput("ui2", "Sentence", "현대모비스 빅데이터팀의 팀명이 AIM LAB으로 변경되었습니다.")
 actionButton("act2", "Analysis")
 
-d <- reactive({
+d2 <- reactive({
   sentence <- input$ui2
   extractNoun(sentence)
 })
@@ -88,7 +146,7 @@ d <- reactive({
 renderPrint({
   req(input$act2)
   isolate({
-    d() %>% print
+    d2() %>% print
   })
 })
 ```
