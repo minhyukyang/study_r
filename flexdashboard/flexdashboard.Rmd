@@ -1,5 +1,5 @@
 ---
-title: "AIM LAB"
+title: "AIM x LAB"
 runtime : shiny
 output: 
   flexdashboard::flex_dashboard:
@@ -130,12 +130,12 @@ Sentiment Analysis Demo
 
 ### Input
 
-```{r input_text}
+```{r}
 # textInput("ui2", "Sentence", 
 #           width = "100%", 
 #           value = "현대모비스 빅데이터팀의 팀명이 AIM LAB으로 변경되었습니다.")
 textAreaInput("ui2", "Sentence", 
-          width = "100%", height = "100%", rows = "6", resize = "both",
+          width = "400px", height = "100%", rows = "6", resize = "both",
           value = "현대모비스 빅데이터팀의 팀명이 AIM LAB으로 변경되었습니다.")
 
 actionButton("act2", "Analysis")
