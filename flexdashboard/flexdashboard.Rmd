@@ -78,6 +78,14 @@ column
 ### Image
 ```{r, fig.retina = 1}
 include_graphics("pic/receipt.png") 
+# 
+# actionButton("ocr_act", "Analysis")
+# 
+# ocr_react <- reactive({
+#   sentence <- input$ui2
+#   extractNoun(sentence)
+# })
+
 ```
 
 column
