@@ -78,14 +78,12 @@ column
 ### Image
 ```{r, fig.retina = 1}
 include_graphics("pic/receipt.png") 
-# 
-# actionButton("ocr_act", "Analysis")
-# 
-# ocr_react <- reactive({
-#   sentence <- input$ui2
-#   extractNoun(sentence)
-# })
 
+actionButton("ocr_act", "Analysis")
+
+# ocr_proc <- reactive({
+#   image_read("pic/receipt.png")
+# })
 ```
 
 column
@@ -93,45 +91,66 @@ column
 
 ### Extract
 ```{r}
-image <- image_read("pic/receipt.png")
-
-image_bearb <- image %>%
-  image_scale("x2000") %>%                        # rescale
-  image_background("white", flatten = TRUE) %>%   # set background to white
-  image_trim() %>%                                # Trim edges that are the background color from the image.
-  image_noise() %>%                               # Reduce noise in image using a noise peak elimination filter
-  image_enhance() %>%                             # Enhance image (minimize noise)
-  image_normalize() %>%                           # Normalize image (increase contrast by normalizing the pixel values to span the full range of color values).
-  image_contrast(sharpen = 1)                  # increase contrast
-  # image_deskew(treshold = 40)                     # deskew image -> creates negative offset in some scans
-
-# image_browse(image_bearb)
-# image_write(image_bearb, path = "flexdashboard/pic/receipt_scan_bearb.png", format = "png")
-
-whitelist <- "1234567890-.,;:qwertzuiopüasdfghjklöäyxcvbnmQWERTZUIOPÜASDFGHJKLÖÄYXCVBNM@ß€!$%&/()=?+"
-
-text <- ocr(image_bearb,
-# text <- ocr("flexdashboard/pic/receipt_scan_bearb.png",
-            engine = tesseract(language = "eng", 
-                               options = list(tessedit_char_whitelist = whitelist)))
-
-text_df <- data.frame(text = read.delim(textConnection(text),    # make text into dataframe
-                                        header = FALSE, 
-                                        sep = "\n", 
-                                        strip.white = TRUE))
+renderPrint({
+  req(input$ocr_act)
+  isolate({
+    image <- image_read("pic/receipt.png")
+    image_bearb <- image %>%
+      image_scale("x2000") %>%                        # rescale
+      image_background("white", flatten = TRUE) %>%   # set background to white
+      image_trim() %>%                                # Trim edges that are the background color from the image.
+      image_noise() %>%                               # Reduce noise in image using a noise peak elimination filter
+      image_enhance() %>%                             # Enhance image (minimize noise)
+      image_normalize() %>%                           # Normalize image (increase contrast by normalizing the pixel values to span the full range of color values).
+      image_contrast(sharpen = 1)    
+    
+    whitelist <- "1234567890-.,;:qwertzuiopüasdfghjklöäyxcvbnmQWERTZUIOPÜASDFGHJKLÖÄYXCVBNM@ß€!$%&/()=?+"
+    text <- ocr(image_bearb, engine = tesseract(language = "eng", options = list(tessedit_char_whitelist = whitelist)))
+    text_df <- data.frame(text = read.delim(textConnection(text),    # make text into dataframe
+                                            header = FALSE, 
+                                            sep = "\n", 
+                                            strip.white = TRUE))
+    text_df %>% datatable
+  })
+})
+# 
+# image_bearb <- image %>%
+#   image_scale("x2000") %>%                        # rescale
+#   image_background("white", flatten = TRUE) %>%   # set background to white
+#   image_trim() %>%                                # Trim edges that are the background color from the image.
+#   image_noise() %>%                               # Reduce noise in image using a noise peak elimination filter
+#   image_enhance() %>%                             # Enhance image (minimize noise)
+#   image_normalize() %>%                           # Normalize image (increase contrast by normalizing the pixel values to span the full range of color values).
+#   image_contrast(sharpen = 1)                  # increase contrast
+#   # image_deskew(treshold = 40)                     # deskew image -> creates negative offset in some scans
+# 
+# # image_browse(image_bearb)
+# # image_write(image_bearb, path = "flexdashboard/pic/receipt_scan_bearb.png", format = "png")
+# 
+# whitelist <- "1234567890-.,;:qwertzuiopüasdfghjklöäyxcvbnmQWERTZUIOPÜASDFGHJKLÖÄYXCVBNM@ß€!$%&/()=?+"
+# 
+# text <- ocr(image_bearb,
+# # text <- ocr("flexdashboard/pic/receipt_scan_bearb.png",
+#             engine = tesseract(language = "eng", 
+#                                options = list(tessedit_char_whitelist = whitelist)))
+# 
+# text_df <- data.frame(text = read.delim(textConnection(text),    # make text into dataframe
+#                                         header = FALSE, 
+#                                         sep = "\n", 
+#                                         strip.white = TRUE))
 # text_df <- data.frame(text = read.delim(textConnection(text),    # make text into dataframe
 #                                         header = FALSE, 
 #                                         sep = "\n", 
 #                                         strip.white = TRUE)) %>%
 #   mutate(text = as.character(V1)) %>%
-#   unnest_tokens(word, text) %>%                                      # separate words
-#   mutate(word = wordStem(word, language = "eng"))                    # use word stem
-
-text_df %>% datatable
+# #   unnest_tokens(word, text) %>%                                      # separate words
+# #   mutate(word = wordStem(word, language = "eng"))                    # use word stem
+# 
+# text_df %>% datatable
 
 ```
 
-Senetiment Analysis
+Sentiment Analysis
 =================================================
 
 Sentiment Analysis Demo
@@ -139,28 +158,49 @@ Sentiment Analysis Demo
 ### Input
 
 ```{r}
-# textInput("ui2", "Sentence", 
-#           width = "100%", 
-#           value = "현대모비스 빅데이터팀의 팀명이 AIM LAB으로 변경되었습니다.")
-textAreaInput("ui2", "Sentence", 
+textAreaInput("senti_anal_ui", "sentence", 
           width = "400px", height = "100%", rows = "6", resize = "both",
           value = "현대모비스 빅데이터팀의 팀명이 AIM LAB으로 변경되었습니다.")
 
-actionButton("act2", "Analysis")
+actionButton("senti_anal_act", "Analysis")
 
-d2 <- reactive({
-  sentence <- input$ui2
-  extractNoun(sentence)
+sa_proc_noun <- reactive({
+  sentence <- input$senti_anal_ui
+  print("# extractNoun")
+  KoNLP::extractNoun(sentence)
 })
+
+sa_proc_automata <- reactive({
+  sentence <- input$senti_anal_ui
+  print("# HangulAutomata")
+  KoNLP::HangulAutomata(sentence)
+})
+
+# sa_proc_morph <- reactive({
+#   sentence <- input$senti_anal_ui
+#   print("# MorphAnalyzer")
+#   KoNLP::MorphAnalyzer(sentence)
+# })
+#
+# 
+# print("HangulAutomata")
+#   KoNLP::HangulAutomata(sentence)
+#   print("SimplePos09")
+#   KoNLP::SimplePos09(sentence)
+#   print("SimplePos22")
+#   KoNLP::SimplePos22(sentence)
 ```
 
 ### Output
 
 ```{r}
 renderPrint({
-  req(input$act2)
+  req(input$senti_anal_act)
   isolate({
-    d2() %>% print
+    sa_proc_noun() %>% print
+  })
+  isolate({
+    sa_proc_automata() %>% print
   })
 })
 ```
