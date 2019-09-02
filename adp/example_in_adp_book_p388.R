@@ -1,8 +1,10 @@
 # 출처 - ADP 공식 수험서 > 과목4 데이터 분석 > 제2장 통계분석 p388~p395
+# 참고 : https://blog.naver.com/moontaehyeon/221370769090
 
 # [문제] 다음과 같은 데이터가 있다. Y를 반응변수로 하고, X1, X2, X3, X4를 설명변수로 하는 선형회귀모형을 고려하고, 후진제거법을 이용하여 변수를 선택하시오.
 
-# 데이터 생성
+# 1. 데이터 생성 ---------------------------------------------------------------
+
 x1 <- c(7,1,11,11,7,11,3,1,2,21,1,11,10)
 x2 <- c(26,29,56,31,52,55,71,31,54,47,40,66,68)
 x3 <- c(6,15,8,8,6,9,17,22,18,4,23,9,8)
@@ -10,7 +12,7 @@ x4 <- c(60,52,20,47,33,22,6,44,22,26,34,12,12)
 y <- c(78.5,74.3,104.3,87.6,95.9,109.2,102.7,72.5,93.1,115.9,83.8,113.3,109.4)
 
 # 데이터프레임 형태로 변형
-df <- data.frame(x1,x2,x3,x4,y)
+df <- data.frame(x1, x2, x3, x4, y)
 head(df)
 # x1 x2 x3 x4     y
 # 1  7 26  6 60  78.5
@@ -20,7 +22,11 @@ head(df)
 # 5  7 52  6 33  95.9
 # 6 11 55  9 22 109.2
 
-a <- lm(y~x1+x2+x3+x4, data=df)
+# 2. 데이터 분석 ---------------------------------------------------------------
+
+# 2.1 회귀분석 ----------------------------------------------------------------
+
+a <- lm(y ~ x1 + x2 + x3 + x4, data = df)
 a
 # Call:
 #   lm(formula = y ~ x1 + x2 + x3 + x4, data = df)
@@ -28,6 +34,8 @@ a
 # Coefficients:
 #   (Intercept)           x1           x2           x3           x4  
 # 62.4054       1.5511       0.5102       0.1019      -0.1441
+
+# 회귀식 : y = 62.4054 + 1.5511 * x1 + 0.5102 * x2 + 0.1019 * x3 - 0.1441 * x4
 
 summary(a)
 # Call:
@@ -51,7 +59,16 @@ summary(a)
 # Multiple R-squared:  0.9824,	Adjusted R-squared:  0.9736
 # F-statistic: 111.5 on 4 and 8 DF,  p-value: 4.756e-07
 
-b <- lm(y~x1+x2+x4,data=df)
+# 설명변수 x3의 p-value가 가장 큰 값으로 유의하지 않음
+# 수정된 결정계수(Adjusted R-squared)가 0.9736으로 매우 높아, 추정된 회귀식이 데이터를 약 97%로 적절하게 설명함
+# F-통계량(F-statistic)의 값이 111.5이고 p-value < 0.05로 추정된 회귀모형이 통계적으로 유의하다고 볼 수 있음
+
+
+# 2.2 변수제거 : x3 -----------------------------------------------------------
+
+# 설명변수 x3의 p-value값으로 보아 가장 유의하지 않을 확률이 높으므로, 이를 제거하고 분석을 수행함
+
+b <- lm(y ~ x1 + x2 + x4, data = df)
 summary(b)
 # Call:
 #   lm(formula = y ~ x1 + x2 + x4, data = df)
@@ -73,7 +90,16 @@ summary(b)
 # Multiple R-squared:  0.9823,	Adjusted R-squared:  0.9764 
 # F-statistic: 166.8 on 3 and 9 DF,  p-value: 3.323e-08
 
-c <- lm(y~x1+x2,data=df)
+# 수정된 결정계수(Adjusted R-squared)가 0.9764으로 매우 높아, 추정된 회귀식이 데이터를 약 97%로 적절하게 설명함
+# F-통계량(F-statistic)의 값이 166.8이고 p-value < 0.05로 추정된 회귀모형이 통계적으로 유의하다고 볼 수 있음
+# 설명변수 x3을 제거하고 수정된 결정계수(Adjusted R-squared)값이 0.9764로 높아짐
+
+
+# 2.3 변수제거 : x3, x4 -------------------------------------------------------
+
+# 설명변수 x3 다음으로 p-value가 높았던 x4도 제거하고 회귀분석 수행
+
+c <- lm(y ~ x1 + x2, data = df)
 summary(c)
 # Call:
 #   lm(formula = y ~ x1 + x2, data = df)
@@ -94,8 +120,14 @@ summary(c)
 # Multiple R-squared:  0.9787,	Adjusted R-squared:  0.9744 
 # F-statistic: 229.5 on 2 and 10 DF,  p-value: 4.407e-09
 
-# 예제1 : 전진선택법
-step(lm(y~1,df), scope=list(lower=~1,upper=~x1+x2+x3+x4), direction="forward")
+# 설명변수 x4를 추가로 제거하고 수정된 결정계수(Adjusted R-squared)가 0.9744로 더이상 높아지지 않음
+# F-통계량, p-value는 유의수준내에서 유의하며, 설명변수의 p-value도 모두 유의수준 5%로 유의함
+
+
+# 2.4 step 함수 적용 : 전진선택법 --------------------------------------------------
+
+step(lm(y ~ 1, df), scope=list(lower = ~1,upper = ~x1 + x2 + x3 + x4), direction = "forward")
+
 # Start:  AIC=71.44
 # y ~ 1
 # 
@@ -137,8 +169,11 @@ step(lm(y~1,df), scope=list(lower=~1,upper=~x1+x2+x3+x4), direction="forward")
 #   (Intercept)           x4           x1           x2  
 # 71.6483      -0.2365       1.4519       0.4161  
 
-# 예제2 : 단계적 변수선택법 
-step(lm(y~1,df), scope=list(lower=~1,upper=~x1+x2+x3+x4), direction="both")
+
+# 2.5 step 함수 적용 : 단계적 변수선택법 ----------------------------------------------
+
+step(lm(y ~ 1, df), scope=list(lower = ~1, upper = ~x1 + x2 + x3 + x4), direction = "both")
+
 # Start:  AIC=71.44
 # y ~ 1
 # 
