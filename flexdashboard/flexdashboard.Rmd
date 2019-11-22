@@ -28,6 +28,7 @@ library(knitr)
 library(tidytext)
 library(tidyverse)
 library(SnowballC)
+setwd("U:/Analysis/R/study_r/flexdashboard/")
 ```
 Sidebar {.sidebar}
 =================================================
@@ -77,7 +78,7 @@ column
 
 ### Image
 ```{r, fig.retina = 1}
-include_graphics("pic/receipt.png") 
+knitr::include_graphics("pic/receipt.png") 
 
 actionButton("ocr_act", "Analysis")
 
