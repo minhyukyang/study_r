@@ -106,13 +106,18 @@ ggplot() +
 # Plot shows model was a good fit.
 
 # Finding accuracy
-# fixed : if y_pred < 0, change value to 1e-10
+# fixed : if y_pred < 0, then y_pred is 1e-10
 compare <- cbind(actual=testSet$x, y_pred)  
-compare[,2] <- ifelse(compare[,2]<0, 1e-10, compare[,2])
+compare[,2] <- ifelse(compare[,2]<0, 1e-10, compare[,2]) # fixed by Daniel 
 mean(apply(compare, 1, min)/apply(compare, 1, max))
 mean(0.9,0.9,0.9,0.9)
 # 0.983023
 # 0.9
+
+# calculating the RMSE
+compare.rmse <- sqrt(mean((compare[,2]-compare[,1])^2))
+compare.rmse 
+## 0.137161
 
 # Check for residual mean and distribution
 par(mfrow = c(1, 1))
