@@ -4,15 +4,17 @@
 # [adp 실기] Titanic 데이터 실습 : (1)https://vvwwvw.tistory.com/30
 
 # 0. set env --------------------------------------------------------------
+# install.packages("gbm")
 library(tidyverse)
 library(data.table)
-setwd("u:/Analysis/R/study_r/adp/titanic/")
+library(gbm)
+setwd("d:/Analysis/R/study_r/adp/titanic/src/")
 
 ## Data Import
 # titanic.train <- read.csv("train.csv", stringsAsFactors = FALSE, header = TRUE)
 # titanic.test <- read.csv("test.csv", stringsAsFactors = FALSE, header = TRUE)
-titanic.train <- read_csv("train.csv")
-titanic.test <- read_csv("test.csv")
+titanic.train <- read_csv("../input/train.csv")
+titanic.test <- read_csv("../input/test.csv")
 
 ## Data Structure
 str(titanic.train)
