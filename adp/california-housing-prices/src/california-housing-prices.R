@@ -157,7 +157,7 @@ head(scaled_housing_num)
 
 # 참고 : [표준화(standardization)와 정규화(normalization)](https://m.blog.naver.com/PostView.nhn?blogId=angryking&logNo=221330145300&proxyReferer=https%3A%2F%2Fwww.google.com%2F)
 
-# 2.4 가공 변수 합치기(Merge the altered numerical and categorical datafr --------
+# 2.4 가공 변수 합치기(Merge the altered numerical and categorical datafr
 
 cleaned_housing = cbind(cat_housing, scaled_housing_num, median_house_value=housing$median_house_value)
 head(cleaned_housing)
