@@ -1,4 +1,4 @@
-# 이 포스팅은 kaggle의 California Housing Prices 문제 풀이를 따라 연습한 글입니다.
+# 이 포스팅은 Kaggle의 California Housing Prices 문제 풀이를 따라 연습한 글입니다.
 # 해당 포스트에 문제가 있을 시 알려주시면 수정하겠습니다.
 # 출처 : [kaggle - California Housing Prices](https://www.kaggle.com/camnugent/introduction-to-machine-learning-in-r-tutorial)
 
