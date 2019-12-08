@@ -1,18 +1,20 @@
 setwd("d:/Analysis/R/study_r/adp")
 
 # 머신러닝 문제 해결 과정에서는 다양한 데이터 전처리(Preprocessing) 스킬이 요구되며, 변수 타입별로 각각 다른 방법을 적용해야 합니다.
-# 이번 글에서는 범주형 변수(Categorical Variable) 처리 방법 중 One-Hot Encoding에 대한 내용을 소개합니다.
+# 이번 글에서는 범주형 변수(Categorical Variable) 처리 방법 중 **One-Hot Encoding**에 다양한 해결 방법들을 소개합니다.
 
-# ### 1. One-Hot Encoding?
-# 
+# ### One-Hot Encoding?
+# 데이터에는 수치형 데이터와 텍스트 데이터나 범주형 데이터가 있습니다. 머신러닝이나 딥러닝 알고리즘은 수치로 된 데이터만 이해할 수 있습니다.
+# 그래서 기계가 이해할 수 있는 형태로 데이터를 변환해 주어야 하는데 범주형 데이터는 원핫인코딩 형태로 변환해 줍니다.
+# 원핫인코딩이란 해당되는 하나의 데이터만 1로 변경해 주고 나머지는 0으로 채워주는 것을 뜻합니다.
+# - 출처 : [범주형 데이터 다루기 - 원핫인코딩](https://programmers.co.kr/learn/courses/21/lessons/11043)
 
-# 본 글에서는 범주형 데이터 처리 방법 중, 
-# 이 포스팅은 Kaggle의 California Housing Prices 문제 풀이를 따라 연습한 글입니다.
-# 해당 포스트에 문제가 있을 시 알려주시면 수정하겠습니다.
-# 출처 : [kaggle - California Housing Prices](https://www.kaggle.com/camnugent/introduction-to-machine-learning-in-r-tutorial)
+# 데이터는 [kaggle - California Housing Prices](https://www.kaggle.com/camnugent/introduction-to-machine-learning-in-r-tutorial) 의 데이터를 사용하겠습니다.
 
+housing <- housing <- read.csv("california-housing-prices/input/housing.csv")
 
-# Tips --------------------------------------------------------------------
+# ### Case 1
+library(dplyr)
 
 data <- housing %>%
   mutate(mean_bedrooms = (total_bedrooms / households),
@@ -23,6 +25,41 @@ data <- housing %>%
          inland = ifelse(ocean_proximity == "INLAND", 1, 0),
          near_ocean = ifelse(ocean_proximity == "NEAR OCEAN", 1, 0),
          island = ifelse(ocean_proximity == "ISLAND", 1, 0))
+
+head(housing)
+#   longitude latitude housing_median_age total_rooms total_bedrooms population households median_income
+# 1   -122.23    37.88                 41         880            129        322        126        8.3252
+# 2   -122.22    37.86                 21        7099           1106       2401       1138        8.3014
+# 3   -122.24    37.85                 52        1467            190        496        177        7.2574
+# 4   -122.25    37.85                 52        1274            235        558        219        5.6431
+# 5   -122.25    37.85                 52        1627            280        565        259        3.8462
+# 6   -122.25    37.85                 52         919            213        413        193        4.0368
+# median_house_value ocean_proximity
+# 1             452600        NEAR BAY
+# 2             358500        NEAR BAY
+# 3             352100        NEAR BAY
+# 4             341300        NEAR BAY
+# 5             342200        NEAR BAY
+# 6             269700        NEAR BAY
+
+head(data)
+# longitude latitude housing_median_age population households median_income median_house_value
+# 1   -122.23    37.88                 41        322        126        8.3252             452600
+# 2   -122.22    37.86                 21       2401       1138        8.3014             358500
+# 3   -122.24    37.85                 52        496        177        7.2574             352100
+# 4   -122.25    37.85                 52        558        219        5.6431             341300
+# 5   -122.25    37.85                 52        565        259        3.8462             342200
+# 6   -122.25    37.85                 52        413        193        4.0368             269700
+# ocean_proximity mean_bedrooms mean_rooms near_bay h_ocean inland near_ocean island
+# 1        NEAR BAY     1.0238095   6.984127        1       0      0          0      0
+# 2        NEAR BAY     0.9718805   6.238137        1       0      0          0      0
+# 3        NEAR BAY     1.0734463   8.288136        1       0      0          0      0
+# 4        NEAR BAY     1.0730594   5.817352        1       0      0          0      0
+# 5        NEAR BAY     1.0810811   6.281853        1       0      0          0      0
+# 6        NEAR BAY     1.1036269   4.761658        1       0      0          0      0
+
+
+# 출처 : [kaggle - California Housing Prices](https://www.kaggle.com/camnugent/introduction-to-machine-learning-in-r-tutorial)
 
 
 # Tips2 -------------------------------------------------------------------
@@ -50,11 +87,13 @@ library(mltools)
 library(data.table)
 
 newdata <- one_hot(as.data.table(data))
+
 # Method 2: dummyVars in caret package
 library(caret)
 
 dummy <- dummyVars(" ~ .", data=data)
 newdata <- data.frame(predict(dummy, newdata = data)) 
+
 # Method 3: dcast in reshape2 package
 library(reshape2)
 
