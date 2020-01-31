@@ -28,7 +28,8 @@ library(knitr)
 library(tidytext)
 library(tidyverse)
 library(SnowballC)
-setwd("U:/Analysis/R/study_r/flexdashboard/")
+# setwd("U:/Analysis/R/study_r/flexdashboard/")
+setwd("d:/Analysis/R/study_r/flexdashboard/")
 ```
 Sidebar {.sidebar}
 =================================================
