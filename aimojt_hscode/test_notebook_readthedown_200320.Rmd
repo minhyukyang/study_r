@@ -1,20 +1,15 @@
 ---
-title: "R Notebook Test"
-subtitle: "AIM OJT - Recommend HS Code Project"
+title: "Main Title"
+subtitle: "Sub Title"
 date: "Last Updated: `r format(Sys.time())`"
 author: Minhyuk Yang
 output: 
-  html_document: 
-    css: style.css
-    highlight: textmate
-    number_sections: yes
-    theme: spacelab
-    toc: yes
-    toc_float: yes
+  rmdformats::readthedown:
+css: style.css
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo=T, fig.align = "center", message=F, warning=F, fig.height = 8, cache=T, dpi = 300)
+knitr::opts_chunk$set(echo=T, fig.align = "center", message=F, warning=F, fig.height = 8, dpi = 300)
 ```
 
 > 본 예제는 R을 이용하여 웹 데이터를 크롤링 하는 예제입니다.

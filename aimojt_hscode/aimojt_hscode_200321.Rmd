@@ -1,0 +1,98 @@
+---
+title: "Recommend HS Code"
+subtitle: "AIM OJT 2ND"
+date: "Last Updated: `r format(Sys.time())`"
+author: Minhyuk Yang
+output: 
+  rmdformats::readthedown:
+    toc_depth: 3
+css: style.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=T, fig.align = "center", message=F, warning=F, fig.height = 8, dpi = 300)
+```
+
+
+> 본 예제는 R을 이용하여 웹 데이터를 크롤링 하는 예제입니다.
+
+# 1. 목적
+
+HS CODE 추천을 위해 필요한 부가 정보들을 [관세청 관세법령정보포털](https://unipass.customs.go.kr/clip/index.do)에서 크롤링 하여 수집한다.
+
+# 2. 대상 
+
+1. HS 해설서  
+    - 세계HS > HS 해설서 > 상세보기 > 호 해설 > 국문  
+    - 세계HS > HS 해설서 > 상세보기 > 호 해설 > 영문
+  
+  
+2. HS 가이드  
+    - 세계HS > HS 가이드 > 자동차부품 > 품명 > 상세정보
+
+# 3. 크롤링
+
+## 3.1 HS 해설서
+
+### 3.1.1 국문
+
+크롤링 대상은 `호 해설 - 국문`으로 텍스트만 추출한 결과는 아래와 같습니다.  
+추출이 가능하지만 활용을 위한 정제가 필요합니다.  
+
+1. 대상 테이블에서 크롤링 대상 정보 추출
+    - 변수 : `전체 건수`, `전체 페이지수`, `년도`, `HS분류`
+2. 크롤링 대상 리스트 변수 생성
+3. 크롤링 수행
+4. 결과 확인
+
+```{r, echo=F}
+# 데이터 크롤링 및 결과 표출
+library(rvest)
+rmarkdown::paged_table(mtcars)
+```
+
+
+### 3.1.2 영문
+
+크롤링 대상은 `호 해설 - 영문`으로 텍스트만 추출한 결과는 아래와 같습니다.  
+국문과 동일하게 추출 가능한 것으로 파악되며 역시 추가 정제가 필요합니다.
+
+1. 대상 테이블에서 크롤링 대상 정보 추출
+    - 변수 : `전체 건수`, `전체 페이지수`, `년도`, `HS분류`
+2. 크롤링 대상 리스트 변수 생성
+3. 크롤링 수행
+4. 결과 확인
+
+```{r, echo=F}
+# 데이터 크롤링 및 결과 표출
+library(rvest)
+rmarkdown::paged_table(mtcars)
+```
+
+## 3.2 HS 가이드
+
+HS의 가이드의 경우, 추출이 필요한 대상은 `HS CODE 별 상세 정보`이며, 상세정보는 표로 구성되어 있습니다.  
+표로 구성된 내용 추출은 아래와 같이 가능하며, 내용 중 이미지의 경우 대상 폴더를 지정하여 저장 가능합니다.
+
+
+1. 대상 테이블에서 크롤링 대상 정보 추출
+    - 변수 : `전체 건수`, `전체 페이지수`, `년도`, `HS분류`
+2. 크롤링 대상 리스트 변수 생성
+3. 크롤링 수행
+4. 결과 확인
+
+```{r, echo=F}
+# 데이터 크롤링 및 결과 표출
+library(rvest)
+rmarkdown::paged_table(mtcars)
+```
+
+# TEST
+```{r}
+library(xml2)
+url <- "http://www.bobaedream.co.kr/cyber/CyberCar.php?gubun=K&page=1" #내가 수집하길 원하는 페이지 주소 
+usedCar <- read_html(url) #해당 url 페이지의 html tag를 가져와서 parsing함. usedCar
+print(usedCar)
+```
+
+
