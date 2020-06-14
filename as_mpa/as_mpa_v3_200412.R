@@ -85,7 +85,7 @@ q2 %>%
   print(n=1000)
  
 #S1
-cps <- Corpus(VectorSource(q2_tdm$response))
+cps <- Corpus(VectorSource(cleaned_text$response))
 # (tdm <- TermDocumentMatrix(cps))
 # tdm <- TermDocumentMatrix(corpus,control=list(removePunctuation=T))
 tdm <- TermDocumentMatrix(cps,control=list(
@@ -111,9 +111,7 @@ q3 %>%
   print(n=1000)
  
 #S1
-cps <- Corpus(VectorSource(q2_tdm$response))
-# (tdm <- TermDocumentMatrix(cps))
-# tdm <- TermDocumentMatrix(corpus,control=list(removePunctuation=T))
+cps <- Corpus(VectorSource(cleaned_text$response))
 tdm <- TermDocumentMatrix(cps,control=list(
   removePunctuation=T,
   wordLengths=c(1,Inf),
@@ -123,4 +121,4 @@ tdm <- TermDocumentMatrix(cps,control=list(
 
 t(inspect(tdm[1:30, 1:20]))
 tdm_matrix <- as.data.frame(t(as.matrix(tdm)))
-write_csv(tdm_matrix, "tdm_matrix.csv",)
+write_csv(tdm_matrix, "tdm_matrix_q3.csv",)

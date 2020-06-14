@@ -1,0 +1,144 @@
+---
+title: "R Notebook"
+output: 
+  html_notebook: 
+    toc: yes
+---
+
+# 0. 데이터 입력
+
+```{r}
+data(iris)
+```
+
+# 1. 통계량 확인 
+
+```{r}
+summary(iris) # 통계량 확인
+```
+
+```{r}
+attributes(iris) # 변수 구조 확인
+```
+
+```{r}
+str(iris) # 컬럼별 타입 확인
+```
+
+
+
+
+nrow(iris) # 행 수 반환 
+ncol(iris) # 열 수 반환 
+dim(iris) # 150 5
+
+head(iris) # 상단 6개 데이터 확인
+head(iris, 10) # 상단 10개 데이터 확인
+tail(iris) # 하단 6개 데이터 확인
+
+# 2. NA/NULL 확인 -----------------------------------------------------------
+
+summary(iris) # 통계량 확인
+# Sepal.Length    Sepal.Width     Petal.Length    Petal.Width          Species  
+# Min.   :4.300   Min.   :2.000   Min.   :1.000   Min.   :0.100   setosa    :50  
+# 1st Qu.:5.100   1st Qu.:2.800   1st Qu.:1.600   1st Qu.:0.300   versicolor:50  
+# Median :5.800   Median :3.000   Median :4.350   Median :1.300   virginica :50  
+# Mean   :5.843   Mean   :3.057   Mean   :3.758   Mean   :1.199                  
+# 3rd Qu.:6.400   3rd Qu.:3.300   3rd Qu.:5.100   3rd Qu.:1.800                  
+# Max.   :7.900   Max.   :4.400   Max.   :6.900   Max.   :2.500 
+
+iris$Sepal.Length[2] <- NA # NA 추가
+summary(iris) # 통계량 확인
+# Sepal.Length   Sepal.Width     Petal.Length    Petal.Width          Species  
+# Min.   :4.30   Min.   :2.000   Min.   :1.000   Min.   :0.100   setosa    :50  
+# 1st Qu.:5.10   1st Qu.:2.800   1st Qu.:1.600   1st Qu.:0.300   versicolor:50  
+# Median :5.80   Median :3.000   Median :4.350   Median :1.300   virginica :50  
+# Mean   :5.85   Mean   :3.057   Mean   :3.758   Mean   :1.199                  
+# 3rd Qu.:6.40   3rd Qu.:3.300   3rd Qu.:5.100   3rd Qu.:1.800                  
+# Max.   :7.90   Max.   :4.400   Max.   :6.900   Max.   :2.500                  
+# NA's   :1
+
+table(is.na(iris$Sepal.Length)) # TRUE
+# FALSE  TRUE 
+# 149     1
+
+# 3. 이상값(Outlier) 확인 ------------------------------------------------------
+
+# (1) 결측치 제거
+dataset2 <- na.omit(dataset) # 전체 변수 대상 
+dim(dataset) # 300   7
+dim(dataset2) # 209   7
+table(is.na(dataset2))
+
+stock <- read.csv(file.choose()) # stock.csv
+str(stock)
+dim(stock) # 6706   69
+# $ Sector # 분야 
+# $ Market.Cap : 시가총액 
+# $ P.E : 주가수익 
+# $ Forward.P.E : 예상주가수익 
+
+library(dplyr)
+# 형식) df %>% filter(필터조건) -> 행선택 
+stock_df <- stock %>% filter(!is.na(Market.Cap)) # 특정 변수 대상 
+dim(stock_df) # 5028   69
+
+
+# 2) 0, 평균 대체 
+x <- dataset$price
+x[1:30]
+
+# 0 대체 
+dataset$price2 <- ifelse(is.na(x), 0, x)
+head(dataset,30)
+
+# 평균 대체 
+dataset$price3 <- ifelse(is.na(x), 
+                         mean(x, na.rm = T), x)
+
+head(dataset, 30)
+dim(dataset) # 300   9
+
+dataset[c("price", "price2", "price3")]
+
+
+# 3) 통계적 방법 : 고객 유형별 NA 처리 
+# type : 1.우수, 2.보통, 3.저조 
+# 1. 우수 : mean(8.75)*1.5
+# 2. 보통 : mean(8.75)
+# 3. 저조 : mean(8.75)*0.5
+
+dim(dataset) # 300   9
+type <- rep(1:3, 100)
+dataset$type <- type
+head(dataset,30)
+
+price4 <- numeric() # 통계적 방법
+# 구매금액 평균 
+avg <- mean(dataset$price, na.rm = T)
+
+for(i in 1:nrow(dataset)){ # 300회 반복 
+  if(is.na(dataset$price[i])){ # NA
+    if(dataset$type[i] == 1){ # 1. 우수 
+      price4[i] = avg * 1.5
+    }else if(dataset$type[i] == 2){ # 2. 보통
+      price4[i] = avg 
+    }else{ # 3. 저조
+      price4[i] = avg * 0.5
+    }
+  }else{ # NOT NA
+    price4[i] <- dataset$price[i]
+  }
+}
+length(price4) # 300
+
+# 칼럼 추가 
+dataset$price4 <- price4
+dataset[c("price", "price2", "price3", "price4", "type")]
+
+
+# 4. 변수별 자료형 확인(숫자형/범주형) --------------------------------------------------
+
+
+상관분석(범주형 혼합 데이터는?) : `corrplot()`
+

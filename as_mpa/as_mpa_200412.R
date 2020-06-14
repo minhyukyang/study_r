@@ -24,12 +24,11 @@ text_clean <- function(x) {
 
 mpa_raw <- as_tibble(read_csv("mpa.csv"))
 
-
-# Q1
+# split the data
 question_list <- mpa_raw$`Question Text`[!duplicated(mpa_raw$`Question Text`)]
 q1_1 <- mpa_raw[mpa_raw$`Question Text` == question_list[1],]
-q1_1_response <- q1_1$Response
-
+# q1_1_response <- q1_1$Response
+ 
 q1_1_text <- as_tibble(q1_1_response) %>% mutate(document = row_number())
 
 lemmatize_strings(q1_1_text$value)
@@ -67,7 +66,7 @@ before_vs_after <- function(sent_id){
   print(str_c("After :", af, sep = " ", collapse = " "))
 }
 
-before_vs_after(6)
+before_vs_after(9)
 
  # textclean ---------------------------------------------------------------
 # https://rpubs.com/WulanAndriyani/TextPreprocessing
@@ -103,6 +102,7 @@ tb_proces <- tb_proces %>%
   tokenize_words() %>% 
   as.character()
 
+head(tb_proces)
 
 # test ---------------------------------------------------------------------
 # https://www.mjdenny.com/Text_Processing_In_R.html
