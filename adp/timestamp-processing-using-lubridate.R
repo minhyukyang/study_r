@@ -27,7 +27,6 @@
 
 library(lubridate)
 
-  
 dt <- as_datetime(1543590900)
 dt
 
@@ -40,3 +39,22 @@ second(dt)
 wday(dt, label=T)
 
 lubridate::now()
+
+
+as_datetime(1543590900)
+as_datetime(1543591000)
+as_datetime(1543591100)
+
+dt <- data.frame(timestamp = c(1543590900, 1543591000, 1543591100),
+                 A = c(4, 5, 6),
+                 B = c(10, 30, 70),
+                 C = c(6, 1, 7))
+
+dt$datetime <- as_datetime(dt$timestamp)
+dt$yyyymmdd <- format(dt$datetime, "%Y%m%d")
+dt$hhmm <- format(dt$datetime, "%H%S")
+
+dt2 <- data.frame(hhmm = c(1500, 1540, 1520),
+                  usage = c(26000, 20000, 25000))
+
+merge(dt, dt2, by.x="hhmm")
