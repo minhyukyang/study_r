@@ -36,6 +36,8 @@ tableList
 
 # - `for`문을 이용한 반복 처리
 
+library(xlsx)
+
 target_dir <- "./output/"
 
 for(i in 1:length(tableList)){
