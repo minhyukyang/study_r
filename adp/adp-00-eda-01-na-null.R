@@ -16,7 +16,7 @@ head(iris) # 상단 6개 데이터 확인
 head(iris, 10) # 상단 10개 데이터 확인
 tail(iris) # 하단 6개 데이터 확인
 
-# 2. NA/NULL 확인 -----------------------------------------------------------
+# 2. NA/NULL 처리 -----------------------------------------------------------
 
 #  데이터 생성 
 
@@ -44,20 +44,21 @@ table(is.na(iris$Sepal.Length)) # TRUE
 # FALSE  TRUE 
 # 149     1
 
-# (1) 결측값이 포함되어 있는지 확인하는 방법: is.na()
+
+# 2.1 결측값이 포함되어 있는지 확인하는 방법: is.na() --------------------------------------
 
 x <- c(1, 2, 3, 4, NA, 6, 7, 8, 9, NA)
 is.na(x)
 # [1] FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE  TRUE
 
 
-# (2) 결측값이 총 몇 개인지 계산하는 방법: sum(is.na())
+# 2.2 결측값이 총 몇 개인지 계산하는 방법: sum(is.na()) ----------------------------------
 
 sum(is.na(x))
 # [1] 2
 
 
-# (3) 결측값을 통계 분석 시 제외(미포함): na.rm = TRUE
+# 2.3 결측값을 통계 분석 시 제외(미포함): na.rm = TRUE ----------------------------------
 
 sum(x)
 # [1] NA
@@ -69,7 +70,7 @@ mean(x, na.rm = TRUE)
 # [1] 5
 
 
-# (4) 결측값이 들어있는 행 전체를 데이터 셋에서 제거: na.omit()
+# 2.4 결측값이 들어있는 행 전체를 데이터 셋에서 제거: na.omit() -------------------------------
 
 iris2 <- na.omit(iris) # 결측치 포함된 행 제거 
 
@@ -85,11 +86,17 @@ table(is.na(iris2))
 # 745 
 
 
-# (2) NA -> 0 대체
+# 2.5 결측값을 다른 값으로 대체 : NA -> 0 대체 -----------------------------------------
+
 library(tidyverse)
 
-iris %>% drop_na()
-iris %>% replace_na(, 999999)
+iris %>% drop_na() # 결측치 포함된 행 제거 (= na.omit(iris))
+
+summary(iris) # NA 컬럼 확인
+iris %>% head() # NA 처리 전 
+iris %>% replace_na(list(Sepal.Length=0)) %>% head() # NA 처리 후
+
+sapply(function{ifelse(is.na(iris), 0, iris)
 
 iris <- sapply(function{ifelse(is.na(iris), 0, iris)
 head(dataset,30)
