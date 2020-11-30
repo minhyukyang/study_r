@@ -1,0 +1,149 @@
+---
+title: "Cheat Sheet - lubridate"
+output: html_notebook
+---
+
+# Dates and times with lubridate 
+
+```{r, echo=F, warning=F}
+library(lubridate)
+```
+
+
+## 날짜 데이터 처리 형식
+
+```{r}
+ld <- ymd(20201130)
+ld
+```
+```{r}
+ld <- ymd_hms("20201130115025")
+ld
+```
+
+```{r}
+year(ld)
+```
+```{r}
+month(ld)
+```
+```{r}
+day(ld)
+
+```
+```{r}
+hour(ld)
+```
+```{r}
+minute(ld)
+```
+```{r}
+second(ld)
+```
+```{r}
+wday(ld, label=T)
+```
+```{r}
+lubridate::now()
+```
+
+## Example
+
+```{r}
+library(dplyr)
+
+icn <- read_csv("../data/icn.csv", locale = locale('ko', encoding = 'euc-kr')) %>% as_tibble()
+icn
+```
+- `날짜` 변수 생성
+```{r}
+# icn %>%
+#   mutate(날짜 = make_datetime(연, 월, 일, 계획)) %>% 
+#   select(연, 월, 일, 계획, 날짜)
+icn %>%
+  mutate(날짜 = paste(연, 월, 일, 계획) %>% ymd_hms()) %>% 
+  select(연, 월, 일, 계획, 날짜)
+```
+##### Q) 어떤 달에 비행기가 늦게 뜨는 일이 많았을까?
+```{r}
+icn %>% 
+  filter(구분=='여객') %>%
+  mutate(출발시간=paste(연, 월, 일, 출발) %>% ymd_hms(),
+         월=month(출발시간, label=T)) %>%
+  group_by(월, 현황) %>%
+  summarise(count=n()) %>%
+  mutate(비율=count/sum(count)) %>%
+  filter(현황=='지연') %>%
+  ggplot(aes(x=월, y=비율)) +
+  geom_bar(stat='identity') +
+  geom_text(aes(y=비율-.003, label=format(비율*100, digits=2)), color='#ffffff')
+```
+```{r}
+icn %>% 
+  filter(구분=='여객') %>%
+  mutate(출발시간=paste(연, 월, 일, 출발) %>% ymd_hms(),
+         요일=wday(출발시간, label=T)) %>%
+  group_by(요일, 현황) %>%
+  summarise(count=n()) %>%
+  mutate(비율=count/sum(count)) %>%
+  filter(현황=='지연') %>%
+  ggplot(aes(x=요일, y=비율)) +
+  geom_bar(stat='identity') +
+  geom_text(aes(y=비율-.003, label=format(비율*100, digits=2)), color='#ffffff')
+```
+```{r}
+icn %>% 
+  filter(구분=='여객') %>%
+  mutate(계획시간=paste(연, 월, 일, 계획) %>% ymd_hms(),
+         시간대=hour(계획시간)) %>%
+  group_by(시간대, 현황) %>%
+  summarise(count=n()) %>%
+  mutate(비율=count/sum(count)) %>%
+  filter(현황=='지연') %>%
+  ggplot(aes(x=시간대, y=비율)) +
+  geom_bar(stat='identity')
+```
+```{r}
+icn %>% 
+  filter(구분=='여객') %>%
+  mutate(계획시간=paste(연, 월, 일, 계획) %>% ymd_hms(),
+         시간대=hour(계획시간)) %>%
+  group_by(시간대) %>%
+  summarise(count=n())
+```
+
+```{r}
+icn %>% 
+  filter(구분=='여객') %>%
+  mutate(계획시간=paste(연, 월, 일, 계획) %>% ymd_hms(),
+         시간대=hour(계획시간)) %>%
+  group_by(시간대) %>%
+  summarise(count=n()) %>%
+  ggplot(aes(x=시간대, y=count)) +
+  geom_bar(stat='identity')
+```
+```{r}
+icn %>% 
+  filter(구분=='여객') %>%
+  mutate(계획시간=paste(연, 월, 일, 계획) %>% ymd_hms(),
+         시간대=minute(계획시간)) %>%
+  group_by(시간대, 현황) %>%
+  summarise(count=n()) %>%
+  mutate(비율=count/sum(count)) %>%
+  filter(현황=='지연') %>%
+  ggplot(aes(x=시간대, y=비율)) +
+  geom_bar(stat='identity')
+```
+```{r}
+icn %>% 
+  filter(구분=='여객') %>%
+  mutate(계획시간=paste(연, 월, 일, 계획) %>% ymd_hms()) %>% 
+  mutate(시간대=floor_date(계획시간, '10 mins') %>% minute()) %>%
+  group_by(시간대, 현황) %>%
+  summarise(count=n()) %>%
+  mutate(비율=count/sum(count)) %>%
+  filter(현황=='지연') %>%
+  ggplot(aes(x=시간대, y=비율)) +
+  geom_bar(stat='identity')
+```
+
